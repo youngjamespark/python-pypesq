@@ -36,8 +36,8 @@ setup(
     # long_description_content_type='text/markdown',
     author='James Park',
     author_email='youngjamespark@gmail.com',
-    # url='https://github.com/xiongyihui/python-webrtc-audio-processing',
-    # download_url='https://pypi.python.org/pypi/webrtc_audio_processing',
+    # url='https://github.com/youngjamespark/python-pypesq',
+    # download_url='https://github.com/youngjamespark/python-pypesq',
     packages=['pypesq'],
     ext_modules=[
         Extension(
