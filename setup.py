@@ -32,12 +32,12 @@ setup(
     name='pypesq',
     version='0.1.0',
     description='Python bindings of PESQ(P.862 and P.862.2)',
-    # long_description=long_description,
-    # long_description_content_type='text/markdown',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='James Park',
     author_email='youngjamespark@gmail.com',
-    # url='https://github.com/youngjamespark/python-pypesq',
-    # download_url='https://github.com/youngjamespark/python-pypesq',
+    url='https://github.com/youngjamespark/python-pypesq',
+    download_url='https://github.com/youngjamespark/python-pypesq',
     packages=['pypesq'],
     ext_modules=[
         Extension(
