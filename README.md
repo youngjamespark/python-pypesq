@@ -8,7 +8,7 @@ This code is designed for numpy array specially.
 
     C compiler
     numpy
-    cython
+    SWIG
 
 # Build and Install
 $ python setup.py install
