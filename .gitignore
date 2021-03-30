@@ -1,0 +1,17 @@
+build/lib.win-amd64-3.8/pypesq/__init__.py
+build/lib.win-amd64-3.8/pypesq/_pypesq.cp38-win_amd64.pyd
+build/lib.win-amd64-3.8/pypesq/pypesq.py
+build/temp.win-amd64-3.8/Release/pesq/_pypesq.cp38-win_amd64.exp
+build/temp.win-amd64-3.8/Release/pesq/_pypesq.cp38-win_amd64.lib
+build/temp.win-amd64-3.8/Release/pesq/dsp.obj
+build/temp.win-amd64-3.8/Release/pesq/pesqdsp.obj
+build/temp.win-amd64-3.8/Release/pesq/pesqio.obj
+build/temp.win-amd64-3.8/Release/pesq/pesqmain.obj
+build/temp.win-amd64-3.8/Release/pesq/pesqmod.obj
+build/temp.win-amd64-3.8/Release/src/pypesq_wrap.obj
+build/temp.win-amd64-3.8/Release/src/pypesq.obj
+dist/pypesq-0.1.0-py3.8-win-amd64.egg
+pypesq.egg-info/dependency_links.txt
+pypesq.egg-info/PKG-INFO
+pypesq.egg-info/SOURCES.txt
+pypesq.egg-info/top_level.txt
