@@ -13,7 +13,7 @@ double evaluate(char* reference, char* degraded, int sample_rate, char* mode) {
     // printf("sample rate = %d\n", sample_rate);
     // printf("mode = %s\n", mode);
 
-    mos = pesq_main(reference, degraded, sample_rate, mode);
+    mos = pesq(reference, degraded, sample_rate, mode);
         
     return mos;
 }
