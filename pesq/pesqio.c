@@ -11,11 +11,11 @@ Version 2.0 - October 2005.
 DEFINITIONS:
 ------------
 For the purposes of this Intellectual Property Rights Notice
-the terms Perceptual Evaluation of Speech Quality Algorithm
-and PESQ Algorithm refer to the objective speech quality
+the terms ‘Perceptual Evaluation of Speech Quality Algorithm?
+and ‘PESQ Algorithm?refer to the objective speech quality
 measurement algorithm defined in ITU-T Recommendation P.862;
-the term PESQ Software refers to the C-code component of P.862.
-These definitions also apply to those parts of ITU-T Recommendation 
+the term ‘PESQ Software?refers to the C-code component of P.862.
+These definitions also apply to those parts of ITU-T Recommendation
 P.862.2 and its associated source code that are common with P.862.
 
 NOTICE:
@@ -81,7 +81,7 @@ The user may:
 
 ANY OTHER USE OR APPLICATION OF THE PESQ SOFTWARE AND/OR THE PESQ
 ALGORITHM WILL REQUIRE A PESQ LICENCE AGREEMENT, WHICH MAY BE OBTAINED
-FROM EITHER OPTICOM GMBH OR PSYTECHNICS LIMITED. 
+FROM EITHER OPTICOM GMBH OR PSYTECHNICS LIMITED.
 
 EACH COMPANY OFFERS OEM LICENSE AGREEMENTS, WHICH COMBINE OEM
 IMPLEMENTATIONS OF THE PESQ ALGORITHM TOGETHER WITH A PESQ PATENT LICENSE
@@ -107,55 +107,77 @@ Further information is also available from www.pesq.org
 #include "pesq.h"
 #include "dsp.h"
 
-void make_stereo_file (char *stereo_path_name, SIGNAL_INFO *ref_info, SIGNAL_INFO *deg_info) {
-    make_stereo_file2 (stereo_path_name, ref_info, deg_info-> data);
+/* added ByPark */
+typedef struct wav_header {
+    // RIFF Header
+    unsigned char riff_header[4];   // Contains "RIFF"
+    int wav_size;                   // Size of the wav portion of the file, which follows the first 8 bytes. File size - 8
+    unsigned char wave_header[4];   // Contains "WAVE"
+    // Format Header
+    unsigned char fmt_header[4];    // Contains "fmt " (includes trailing space)
+    int fmt_chunk_size;             // Should be 16 for PCM or 18 in some case
+    short audio_format;             // Should be 1 for PCM. 3 for IEEE Float
+    short num_channels;
+    int sample_rate;
+    int byte_rate;                  // Number of bytes per second. sample_rate * num_channels * Bytes Per Sample
+    short sample_alignment;         // num_channels * Bytes Per Sample
+    short bit_depth;                // Number of bits per sample
+    // Data
+    unsigned char data_header[4];   // Contains "data"
+    int data_bytes;                 // Number of bytes in data. Number of samples * num_channels * sample byte size
+} wav_header;
+
+int wav_header_read(FILE* Fi, wav_header* header);
+
+void make_stereo_file(char* stereo_path_name, SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info) {
+    make_stereo_file2(stereo_path_name, ref_info, deg_info->data);
 }
 
-void make_stereo_file2 (char *stereo_path_name, SIGNAL_INFO *ref_info, float *deg) {
+void make_stereo_file2(char* stereo_path_name, SIGNAL_INFO* ref_info, float* deg) {
 
     long            i;
     long            h;
-    short          *buffer;
-    FILE           *outputFile;
+    short* buffer;
+    FILE* outputFile;
     long            n;
 
-    n = ref_info-> Nsamples + DATAPADDING_MSECS  * (Fs / 1000) - 2 * SEARCHBUFFER * Downsample;     
+    n = ref_info->Nsamples + DATAPADDING_MSECS * (Fs / 1000) - 2 * SEARCHBUFFER * Downsample;
 
-    buffer = (short *) safe_malloc (2 * n * sizeof (short));
-    
-    if ((outputFile = fopen (stereo_path_name, "wb")) == NULL) {
-        printf ("MakeStereoFile : cannot open output file %s!", stereo_path_name);
+    buffer = (short*)safe_malloc(2 * n * sizeof(short));
+
+    if ((outputFile = fopen(stereo_path_name, "wb")) == NULL) {
+        printf("MakeStereoFile : cannot open output file %s!", stereo_path_name);
         return;
     }
 
     for (i = 0; i < n; i++) {
-        h = (int) ref_info-> data [SEARCHBUFFER * Downsample + i] / 2;
+        h = (int)ref_info->data[SEARCHBUFFER * Downsample + i] / 2;
         if (h < -32767) h = -32767;
         if (h > 32767)  h = 32767;
-        h = (short) h;
-        buffer [2*i] = (short) h;    
-        h = (int) deg [SEARCHBUFFER * Downsample + i] / 2;
+        h = (short)h;
+        buffer[2 * i] = (short)h;
+        h = (int)deg[SEARCHBUFFER * Downsample + i] / 2;
         if (h < -32767) h = -32767;
         if (h > 32767)  h = 32767;
-        h = (short) h;
-        buffer [2*i + 1] = (short) h;                
+        h = (short)h;
+        buffer[2 * i + 1] = (short)h;
     }
 
-    fwrite (buffer, sizeof (short) * 2, n, outputFile);
-    
-    fclose (outputFile);
-    safe_free (buffer);
+    fwrite(buffer, sizeof(short) * 2, n, outputFile);
+
+    fclose(outputFile);
+    safe_free(buffer);
 }
 
-extern float InIIR_Hsos_16k [];
-extern float InIIR_Hsos_8k [];
+extern float InIIR_Hsos_16k[];
+extern float InIIR_Hsos_8k[];
 extern long InIIR_Nsos;
 
-void select_rate( long sample_rate, long * Error_Flag, char ** Error_Type )
+void select_rate(long sample_rate, long* Error_Flag, char** Error_Type)
 {
-    if( Fs == sample_rate )
+    if (Fs == sample_rate)
         return;
-    if( Fs_16k == sample_rate )
+    if (Fs_16k == sample_rate)
     {
         Fs = Fs_16k;
         Downsample = Downsample_16k;
@@ -164,7 +186,7 @@ void select_rate( long sample_rate, long * Error_Flag, char ** Error_Type )
         Align_Nfft = Align_Nfft_16k;
         return;
     }
-    if( Fs_8k == sample_rate )
+    if (Fs_8k == sample_rate)
     {
         Fs = Fs_8k;
         Downsample = Downsample_8k;
@@ -175,23 +197,23 @@ void select_rate( long sample_rate, long * Error_Flag, char ** Error_Type )
     }
 
     (*Error_Flag) = -1;
-    (*Error_Type) = "Invalid sample rate specified";    
+    (*Error_Type) = "Invalid sample rate specified";
 }
 
-int file_exist( char * fname )
+int file_exist(char* fname)
 {
-    FILE * fp = fopen( fname, "rb" );
-    if( fp == NULL )
+    FILE* fp = fopen(fname, "rb");
+    if (fp == NULL)
         return 0;
     else
     {
-        fclose( fp );
+        fclose(fp);
         return 1;
     }
 }
 
-void load_src( long * Error_Flag, char ** Error_Type,
-         SIGNAL_INFO * sinfo)
+void load_src(long* Error_Flag, char** Error_Type,
+    SIGNAL_INFO* sinfo)
 {
     long name_len;
     long file_size;
@@ -201,195 +223,299 @@ void load_src( long * Error_Flag, char ** Error_Type,
     long read_count;
     long count;
 
-    float *read_ptr;
-    short *input_data;
-    short *p_input;
+    float* read_ptr;
+    short* input_data;
+    short* p_input;
     char s;
-    char *p_byte;
-    FILE *Src_file = fopen( sinfo-> path_name, "rb" );
+    char* p_byte;
+    FILE* Src_file = fopen(sinfo->path_name, "rb");
 
-    input_data = (short *) safe_malloc( 16384 * sizeof(short) );
-    if( input_data == NULL )
+    wav_header header;
+
+    input_data = (short*)safe_malloc(16384 * sizeof(short));
+    if (input_data == NULL)
     {
         *Error_Flag = 1;
         *Error_Type = "Could not allocate storage for file reading";
-        printf ("%s!\n", *Error_Type);
-        fclose( Src_file );
+        printf("%s!\n", *Error_Type);
+        fclose(Src_file);
         return;
     }
 
-    if( Src_file == NULL )
+    if (Src_file == NULL)
     {
         *Error_Flag = 1;
         *Error_Type = "Could not open source file";
-        printf ("%s!\n", *Error_Type);
-        safe_free( input_data );
+        printf("%s!\n", *Error_Type);
+        safe_free(input_data);
         return;
     }
 
-    if( fseek( Src_file, 0L, SEEK_END ) != 0 )
+    if (fseek(Src_file, 0L, SEEK_END) != 0)
     {
         *Error_Flag = 1;
         *Error_Type = "Could not reach end of source file";
-        safe_free( input_data );
-        printf ("%s!\n", *Error_Type);
-        fclose( Src_file );
+        safe_free(input_data);
+        printf("%s!\n", *Error_Type);
+        fclose(Src_file);
         return;
     }
-    file_size = ftell( Src_file );
-    if( file_size < 0L )
+    file_size = ftell(Src_file);
+    if (file_size < 0L)
     {
         *Error_Flag = 1;
         *Error_Type = "Could not measure length of source file";
-        safe_free( input_data );
-        printf ("%s!\n", *Error_Type);
-        fclose( Src_file );
+        safe_free(input_data);
+        printf("%s!\n", *Error_Type);
+        fclose(Src_file);
         return;
     }
-    if( fseek( Src_file, 0L, SEEK_SET ) != 0 )
+    if (fseek(Src_file, 0L, SEEK_SET) != 0)
     {
         *Error_Flag = 1;
         *Error_Type = "Could not reach start of source file";
-        safe_free( input_data );
-        printf ("%s!\n", *Error_Type);
-        fclose( Src_file );
+        safe_free(input_data);
+        printf("%s!\n", *Error_Type);
+        fclose(Src_file);
         return;
     }
-    name_len = strlen( sinfo-> path_name );
-    if( name_len > 4 )
+    name_len = strlen(sinfo->path_name);
+    if (name_len > 4)
     {
-        if( strcmp( sinfo-> path_name + name_len - 4, ".wav" ) == 0 )
-            header_size = 22;
-        if( strcmp( sinfo-> path_name + name_len - 4, ".WAV" ) == 0 )
-            header_size = 22;
-        if( strcmp( sinfo-> path_name + name_len - 4, ".raw" ) == 0 )
+        if (strcmp(sinfo->path_name + name_len - 4, ".wav") == 0)
+            //header_size = 22;
+            header_size = wav_header_read(Src_file, &header);
+        if (strcmp(sinfo->path_name + name_len - 4, ".WAV") == 0)
+            //header_size = 22;
+            header_size = wav_header_read(Src_file, &header);
+        if (strcmp(sinfo->path_name + name_len - 4, ".raw") == 0)
             header_size = 0;
-        if( strcmp( sinfo-> path_name + name_len - 4, ".src" ) == 0 )
+        if (strcmp(sinfo->path_name + name_len - 4, ".src") == 0)
+            header_size = 0;
+        if (strcmp(sinfo->path_name + name_len - 4, ".pcm") == 0)
             header_size = 0;
     }
-    if( name_len > 2 )
+    if (name_len > 2)
     {
-        if( strcmp( sinfo-> path_name + name_len - 2, ".s" ) == 0 )
+        if (strcmp(sinfo->path_name + name_len - 2, ".s") == 0)
             header_size = 0;
     }
 
-    if( header_size > 0 )
-        fread( input_data, 2, header_size, Src_file );
+    if (header_size > 0) {
+        Nsamples = header.data_bytes / 2;
+        fread(input_data, 2, header_size, Src_file);
+    }
+    else
+        Nsamples = (file_size / 2) - header_size;
 
-    Nsamples = (file_size / 2) - header_size;
-    sinfo-> Nsamples = Nsamples + 2 * SEARCHBUFFER * Downsample;
+    sinfo->Nsamples = Nsamples + 2 * SEARCHBUFFER * Downsample;
 
-    sinfo-> data =
-        (float *) safe_malloc( (sinfo-> Nsamples + DATAPADDING_MSECS  * (Fs / 1000)) * sizeof(float) );
-    if( sinfo-> data == NULL )
+    sinfo->data =
+        (float*)safe_malloc((sinfo->Nsamples + DATAPADDING_MSECS * (Fs / 1000)) * sizeof(float));
+    if (sinfo->data == NULL)
     {
         *Error_Flag = 1;
         *Error_Type = "Failed to allocate memory for source file";
-        safe_free( input_data );
-        printf ("%s!\n", *Error_Type);
-        fclose( Src_file );
+        safe_free(input_data);
+        printf("%s!\n", *Error_Type);
+        fclose(Src_file);
         return;
     }
 
-    read_ptr = sinfo-> data;
-    for( read_count = SEARCHBUFFER*Downsample; read_count > 0; read_count-- )
-      *(read_ptr++) = 0.0f;
+    read_ptr = sinfo->data;
+    for (read_count = SEARCHBUFFER * Downsample; read_count > 0; read_count--)
+        *(read_ptr++) = 0.0f;
 
     to_read = Nsamples;
-    while( to_read > 16384 )
+    while (to_read > 16384)
     {
-        read_count = fread( input_data, sizeof(short), 16384, Src_file );
-        if( read_count < 16384 )
+        read_count = fread(input_data, sizeof(short), 16384, Src_file);
+        if (read_count < 16384)
         {
             *Error_Flag = 1;
             *Error_Type = "Error reading source file.";
-            printf ("%s!\n", *Error_Type);
-            safe_free( input_data );
-            safe_free( sinfo-> data );
-            sinfo-> data = NULL;
-            fclose( Src_file );
+            printf("%s!\n", *Error_Type);
+            safe_free(input_data);
+            safe_free(sinfo->data);
+            sinfo->data = NULL;
+            fclose(Src_file);
             return;
         }
-        if( sinfo-> apply_swap )
+        if (sinfo->apply_swap)
         {
-            p_byte = (char *)input_data;
-            for( count = 0L; count < read_count; count++ )
+            p_byte = (char*)input_data;
+            for (count = 0L; count < read_count; count++)
             {
                 s = p_byte[count << 1];
-                p_byte[count << 1] = p_byte[(count << 1)+1];
-                p_byte[(count << 1)+1] = s;
+                p_byte[count << 1] = p_byte[(count << 1) + 1];
+                p_byte[(count << 1) + 1] = s;
             }
         }
         to_read -= read_count;
         p_input = input_data;
-        while( read_count > 0 )
+        while (read_count > 0)
         {
             read_count--;
             *(read_ptr++) = (float)(*(p_input++));
         }
     }
-    read_count = fread( input_data, sizeof(short), to_read, Src_file );
-    if( read_count < to_read )
+    read_count = fread(input_data, sizeof(short), to_read, Src_file);
+    if (read_count < to_read)
     {
         *Error_Flag = 1;
         *Error_Type = "Error reading source file";
-        printf ("%s!\n", *Error_Type);
-        safe_free( input_data );
-        safe_free( sinfo-> data );
-        sinfo-> data = NULL;
-        fclose( Src_file );
+        printf("%s!\n", *Error_Type);
+        safe_free(input_data);
+        safe_free(sinfo->data);
+        sinfo->data = NULL;
+        fclose(Src_file);
         return;
     }
-    if( sinfo-> apply_swap )
+    if (sinfo->apply_swap)
     {
-        p_byte = (char *)input_data;
-        for( count = 0L; count < read_count; count++ )
+        p_byte = (char*)input_data;
+        for (count = 0L; count < read_count; count++)
         {
             s = p_byte[count << 1];
-            p_byte[count << 1] = p_byte[(count << 1)+1];
-            p_byte[(count << 1)+1] = s;
+            p_byte[count << 1] = p_byte[(count << 1) + 1];
+            p_byte[(count << 1) + 1] = s;
         }
     }
     p_input = input_data;
-    while( read_count > 0 )
+    while (read_count > 0)
     {
         read_count--;
         *(read_ptr++) = (float)(*(p_input++));
     }
 
-    for( read_count = DATAPADDING_MSECS  * (Fs / 1000) + SEARCHBUFFER * Downsample;
-         read_count > 0; read_count-- )
-      *(read_ptr++) = 0.0f;
+    for (read_count = DATAPADDING_MSECS * (Fs / 1000) + SEARCHBUFFER * Downsample;
+        read_count > 0; read_count--)
+        *(read_ptr++) = 0.0f;
 
-    fclose( Src_file );
-    safe_free( input_data );
+    fclose(Src_file);
+    safe_free(input_data);
 
-    sinfo-> VAD = safe_malloc( sinfo-> Nsamples * sizeof(float) / Downsample );
-    sinfo-> logVAD = safe_malloc( sinfo-> Nsamples * sizeof(float) / Downsample );
-    if( (sinfo-> VAD == NULL) || (sinfo-> logVAD == NULL))
+    sinfo->VAD = safe_malloc(sinfo->Nsamples * sizeof(float) / Downsample);
+    sinfo->logVAD = safe_malloc(sinfo->Nsamples * sizeof(float) / Downsample);
+    if ((sinfo->VAD == NULL) || (sinfo->logVAD == NULL))
     {
         *Error_Flag = 1;
         *Error_Type = "Failed to allocate memory for VAD";
-        printf ("%s!\n", *Error_Type);
+        printf("%s!\n", *Error_Type);
         return;
     }
 }
 
-void alloc_other( SIGNAL_INFO * ref_info, SIGNAL_INFO * deg_info, 
-        long * Error_Flag, char ** Error_Type, float ** ftmp)
+void alloc_other(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
+    long* Error_Flag, char** Error_Type, float** ftmp)
 {
-    *ftmp = (float *)safe_malloc(
-       max( max(
-            (*ref_info).Nsamples + DATAPADDING_MSECS  * (Fs / 1000),
-            (*deg_info).Nsamples + DATAPADDING_MSECS  * (Fs / 1000) ),
-           12 * Align_Nfft) * sizeof(float) );
-    if( (*ftmp) == NULL )
+    *ftmp = (float*)safe_malloc(
+        max(max(
+            (*ref_info).Nsamples + DATAPADDING_MSECS * (Fs / 1000),
+            (*deg_info).Nsamples + DATAPADDING_MSECS * (Fs / 1000)),
+            12 * Align_Nfft) * sizeof(float));
+    if ((*ftmp) == NULL)
     {
         *Error_Flag = 2;
         *Error_Type = "Failed to allocate memory for temporary storage.";
-        printf ("%s!\n", *Error_Type);
+        printf("%s!\n", *Error_Type);
         return;
     }
+}
+
+
+int wav_header_read(FILE* Fi, wav_header* header)
+{
+    //FILE* Fi;
+    int header_offset = 0;
+
+    /* Parsing wave header information */
+    //Fi = fopen(FileIn, "rb");
+    fseek(Fi, 0, SEEK_SET);
+    // "RIFF"
+    fread(header->riff_header, sizeof(char), 4, Fi);
+    if (strncmp((unsigned char*)header->riff_header, "RIFF", 4) != 0) {
+        fprintf(stderr, "not RIFF,%s \n", header->riff_header);
+        return -1;
+    }
+
+    // wave size = filesize - 8
+    fread(&header->wav_size, sizeof(int), 1, Fi);
+
+    // "WAVE"
+    fread(header->wave_header, sizeof(char), 4, Fi);
+    if (strncmp((char*)header->wave_header, "WAVE", 4) != 0) {
+        fprintf(stderr, "not WAVE\n");
+        return -1;
+    }
+
+    // "fmt "
+    fread(header->fmt_header, sizeof(char), 4, Fi);
+    if (strncmp(header->fmt_header, "fmt ", 4) != 0) {
+        fprintf(stderr, "not fmt \n");
+        return -1;
+    }
+
+    // chunk size = 16 or 18
+    fread(&header->fmt_chunk_size, sizeof(int), 1, Fi);
+
+    // audio format = 1
+    fread(&header->audio_format, sizeof(short), 1, Fi);
+    if (header->audio_format != 1) {
+        fprintf(stderr, "not PCM\n");
+        return -1;
+    }
+
+    // channel number = 1
+    fread(&header->num_channels, sizeof(short), 1, Fi);
+    if (header->num_channels != 1) {
+        fprintf(stderr, "not MONO channel\n");
+        return -1;
+    }
+
+    // sample rate = 16000
+    fread(&header->sample_rate, sizeof(int), 1, Fi);
+    if (header->sample_rate != 16000) {
+        fprintf(stderr, "%d, not 16000Hz\n", header->sample_rate);
+        return -1;
+    }
+
+    // byte rate = 16000 * 2
+    fread(&header->byte_rate, sizeof(int), 1, Fi);
+    if (header->byte_rate != 32000) {
+        fprintf(stderr, "not correct byte rate, %d\n", header->byte_rate);
+        return -1;
+    }
+
+    // sample alignment = 2
+    fread(&header->sample_alignment, sizeof(short), 1, Fi);
+
+    // bit depth = 16
+    fread(&header->bit_depth, sizeof(short), 1, Fi);
+
+    // two bytes chunk
+    if (header->fmt_chunk_size == 0x12)
+        fseek(Fi, 2, SEEK_CUR);
+
+    // "data"
+    fread(header->data_header, sizeof(char), 4, Fi);
+    if (strncmp(header->data_header, "data", 4) != 0) {
+        fprintf(stderr, "not data\n");
+        return -1;
+    }
+
+    // data bytes
+    fread(&header->data_bytes, sizeof(int), 1, Fi);
+
+    if (header->fmt_chunk_size == 0x12)
+        header_offset = sizeof(struct wav_header) + sizeof(short);
+    else
+        header_offset = sizeof(struct wav_header);
+
+    //fclose(Fi);
+    fseek(Fi, 0, SEEK_SET);
+
+    return header_offset / 2;
 }
 
 /* END OF FILE */
