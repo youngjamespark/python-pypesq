@@ -114,7 +114,7 @@ Further information is also available from www.pesq.org
 #if 0
 int main(int argc, const char* argv[]);
 #endif // main()
-int pesq(char* ref_file, char* deg_file, int rate, char* mode);
+float pesq(char* ref_file, char* deg_file, int rate, char* mode);
 void usage(void);
 void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
     ERROR_INFO* err_info, long* Error_Flag, char** Error_Type);
@@ -222,11 +222,13 @@ int main(int argc, const char* argv[])
     else if (err_info.mode == NB_MODE)
         mode = "nb";
 
-    pesq(ref_info.path_name, deg_info.path_name, sample_rate, mode);
+    float mos = 0;
+    mos = pesq(ref_info.path_name, deg_info.path_name, sample_rate, mode);
+    printf("MOS = %3.2f\n", mos);
 }
 #endif // main()
 
-int pesq(char* ref_file, char* deg_file, int rate, char* mode)
+float pesq(char* ref_file, char* deg_file, int rate, char* mode)
 {
     int  names = 0;
     long sample_rate = -1;
@@ -295,12 +297,14 @@ int pesq(char* ref_file, char* deg_file, int rate, char* mode)
     pesq_measure(&ref_info, &deg_info, &err_info, &Error_Flag, &Error_Type);
 
     if (Error_Flag == 0) {
+#if _DEBUG
         if (err_info.mode == NB_MODE)
             printf("\nP.862 Prediction (Raw MOS, MOS-LQO):  = %.3f\t%.3f\n", (double)err_info.pesq_mos,
                 (double)err_info.mapped_mos);
         else
             printf("\nP.862.2 Prediction (MOS-LQO):  = %.3f\n", (double)err_info.mapped_mos);
-        return 0;
+#endif
+        return err_info.mapped_mos;
     }
     else {
         printf("An error of type %d ", Error_Flag);
@@ -424,19 +428,26 @@ void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
 
     if ((*Error_Flag) == 0)
     {
+#if _DEBUG
         printf("Reading reference file %s...", ref_info->path_name);
-
+#endif
         load_src(Error_Flag, Error_Type, ref_info);
+#if _DEBUG
         if ((*Error_Flag) == 0)
             printf("done.\n");
+#endif
     }
     if ((*Error_Flag) == 0)
     {
+#if _DEBUG
         printf("Reading degraded file %s...", deg_info->path_name);
+#endif
 
         load_src(Error_Flag, Error_Type, deg_info);
+#if _DEBUG
         if ((*Error_Flag) == 0)
             printf("done.\n");
+#endif
     }
 
     if (((ref_info->Nsamples - 2 * SEARCHBUFFER * Downsample < Fs / 4) ||
@@ -459,12 +470,15 @@ void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
         float* model_deg;
         long    i;
         FILE* resultsFile;
-
+#if _DEBUG
         printf(" Level normalization...\n");
+#endif
         fix_power_level(ref_info, "reference", maxNsamples);
         fix_power_level(deg_info, "degraded", maxNsamples);
 
+#if _DEBUG
         printf(" IRS filtering...\n");
+#endif
         if (Fs == 16000) {
             WB_InIIR_Nsos = WB_InIIR_Nsos_16k;
             WB_InIIR_Hsos = WB_InIIR_Hsos_16k;
@@ -515,7 +529,9 @@ void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
 
         input_filter(ref_info, deg_info, ftmp);
 
+#if _DEBUG
         printf(" Variable delay compensation...\n");
+#endif
         calc_VAD(ref_info);
         calc_VAD(deg_info);
 
@@ -567,7 +583,9 @@ void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
             }
         }
 
-        printf(" Acoustic model processing...\n");
+#if DEBUG
+        _printf(" Acoustic model processing...\n");
+#endif
         pesq_psychoacoustic_model(ref_info, deg_info, err_info, ftmp);
 
         safe_free(ref_info->data);
