@@ -15,3 +15,4 @@ pypesq.egg-info/dependency_links.txt
 pypesq.egg-info/PKG-INFO
 pypesq.egg-info/SOURCES.txt
 pypesq.egg-info/top_level.txt
+tests/pesq_results.txt
