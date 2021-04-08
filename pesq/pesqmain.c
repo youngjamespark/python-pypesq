@@ -640,7 +640,7 @@ void pesq_measure(SIGNAL_INFO* ref_info, SIGNAL_INFO* deg_info,
             else
                 fprintf(resultsFile, "wb");
 
-            fprintf(resultsFile, "%d\n", Fs);
+            fprintf(resultsFile, "\n");
 
             fclose(resultsFile);
         }
