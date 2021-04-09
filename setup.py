@@ -30,7 +30,7 @@ sources = (
 
 setup(
     name='pypesq',
-    version='0.1.0',
+    version='0.2.0',
     description='Python bindings of PESQ(P.862 and P.862.2)',
     long_description=long_description,
     long_description_content_type='text/markdown',
