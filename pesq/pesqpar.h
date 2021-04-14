@@ -101,6 +101,13 @@ AGREEMENT. PESQ PATENT-ONLY LICENSE AGREEMENTS MAY BE OBTAINED FROM OPTICOM.
 Further information is also available from www.pesq.org
 
 *****************************************************************************/
+#ifndef __PESQPAR_H__
+#define __PESQPAR_H__
+
+#if defined( __cplusplus )
+extern "C"
+{
+#endif
 
 long Fs = 0L;
 
@@ -295,5 +302,9 @@ double abs_thresh_power_16k [49] = {51286152.000000,     2454709.500000,     707
                                     0.524807,     0.524807,     0.512861,     0.478630,     0.426580,     
                                     0.371535,     0.363078,     0.416869,     0.537032};
 
+#if defined( __cplusplus )
+}
+#endif
+#endif __PESQPAR_H__
 
 /* END OF FILE */
