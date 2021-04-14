@@ -272,8 +272,6 @@ float pesq(char* ref_file, char* deg_file, int rate, char* mode)
     infile = UTF8ToANSI(ref_file);
     outfile = UTF8ToANSI(deg_file);
 
-    printf("ref = %s\n", infile);
-    printf("deg = %s\n", outfile);
     strcpy(ref_info.path_name, infile);
     strcpy(deg_info.path_name, outfile);
     delete infile;
