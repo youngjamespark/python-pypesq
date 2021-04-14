@@ -14,6 +14,7 @@ with open('README.md') as f:
     long_description = f.read()
 
 include_dirs = ['src', 'pesq']
+extra_compile_args = ['-std=c++11']
 
 ap_sources = []
 ap_dir_prefix = 'pesq/'
@@ -25,7 +26,12 @@ print(ap_sources)
 
 sources = (
     ap_sources +
-    ['src\\pypesq.c', 'src\\pypesq.i']
+    ['src\\pypesq.cpp', 'src\\pypesq.i']
+)
+
+swig_opts = (
+    ['-c++'] +
+    ['-I' + h for h in include_dirs]
 )
 
 setup(
@@ -43,7 +49,9 @@ setup(
         Extension(
             name='pypesq._pypesq',
             sources=sources,
+            swig_opts=swig_opts,
             include_dirs=include_dirs,
+            extra_compile_args=extra_compile_args
         )
     ],
     classifiers=[
