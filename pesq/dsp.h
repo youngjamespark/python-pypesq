@@ -101,6 +101,13 @@ AGREEMENT. PESQ PATENT-ONLY LICENSE AGREEMENTS MAY BE OBTAINED FROM OPTICOM.
 Further information is also available from www.pesq.org
 
 *****************************************************************************/
+#ifndef __DSP_H__
+#define __DSP_H__
+
+#if defined( __cplusplus )
+extern "C"
+{
+#endif
 
 #ifndef min
   #define min(a,b)  (((a) < (b)) ? (a) : (b))
@@ -137,4 +144,8 @@ Further information is also available from www.pesq.org
     float * x, unsigned long Nx, float * y );
 #endif
 
+#if defined( __cplusplus )
+}
+#endif
+#endif __DSP_H__
 /* END OF FILE */
