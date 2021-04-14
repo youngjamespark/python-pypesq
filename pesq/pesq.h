@@ -101,9 +101,16 @@ AGREEMENT. PESQ PATENT-ONLY LICENSE AGREEMENTS MAY BE OBTAINED FROM OPTICOM.
 Further information is also available from www.pesq.org
 
 *****************************************************************************/
+#ifndef __PESQ_H__
+#define __PESQ_H__
 
 #include <string.h>
 #include <stdlib.h>
+
+#if defined( __cplusplus )
+extern "C"
+{
+#endif
 
 #ifndef TRUE
 #define TRUE 1
@@ -297,5 +304,9 @@ ERROR_INFO * err_info );
 #define     D_WEIGHT    0.1
 #define     A_WEIGHT    0.0309
 
-/* END OF FILE */
+#if defined( __cplusplus )
+}
+#endif
 
+/* END OF FILE */
+#endif __PESQ_H__
